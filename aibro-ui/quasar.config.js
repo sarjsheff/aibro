@@ -100,14 +100,14 @@ module.exports = configure(function (/* ctx */) {
       open: true, // opens browser window automatically\
       proxy: {
         '/api': {
-          target: 'http://10.13.3.21:7002',
+          target: 'http://localhost:8000',
           changeOrigin: true,
           pathRewrite: {
             '^/api': ''
           }
         },
         '/output': {
-          target: 'http://10.13.3.21:7002',
+          target: 'http://localhost:8000',
           changeOrigin: true,
           pathRewrite: {
             '^/output': ''

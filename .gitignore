@@ -1,0 +1,10 @@
+/output
+/output.*
+/*.db
+__pycache__
+/spa
+/data
+/flagged
+/core.*
+/venv
+/ci.sh

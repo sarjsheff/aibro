@@ -1,6 +1,7 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Response
 from pydantic import BaseModel
 import uuid, os, json, shutil
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import datetime
@@ -13,6 +14,7 @@ from diffusers.utils import load_image, make_image_grid
 import torch
 import queue
 import duckdb
+
 
 class Txt2imgRequest(BaseModel):
     prompt: str
@@ -32,13 +34,16 @@ class Txt2imgRequest(BaseModel):
     prompt_script: str
 
 
-def Api():
-
+def Api(output_dir="./output"):
+    if not os.path.isdir(output_dir):
+        os.mkdir(output_dir)
     jobs = {}
     q = queue.Queue(maxsize=1)
     app = FastAPI()
-    app.mount("/output", StaticFiles(directory="output"), name="output")
-    # app.mount("/", StaticFiles(directory="spa"), name="spa")
+    app.mount("/output", StaticFiles(directory=output_dir), name="output")
+    app.mount("/assets", StaticFiles(directory="./app/assets"), name="spa_assets")
+    app.mount("/icons", StaticFiles(directory="./app/icons"), name="spa_icons")
+
     origins = ["*"]
 
     app.add_middleware(
@@ -54,7 +59,8 @@ def Api():
         torch_dtype=torch.float16,
         variant="fp16",
         use_safetensors=True,
-    ).to("cuda")
+    )
+    pipeline.to("cuda")
 
     def gen(id: str):
         q.put(id)
@@ -65,10 +71,10 @@ def Api():
                 # with open(f"./output/{id}/data.json", "w") as f:
                 #     f.write(item.json())
                 idd = datetime.datetime.now().isoformat()
-                os.mkdir(f"./output/{idd}")
-                with open(f"./output/{idd}/data.json", "w") as f:
+                os.mkdir(f"{output_dir}/{idd}")
+                with open(f"{output_dir}/{idd}/data.json", "w") as f:
                     f.write(item.json())
-                
+
                 g = torch.manual_seed(int(item.seed))
                 pipeline(
                     generator=g,
@@ -85,7 +91,7 @@ def Api():
                         item.crops_coords_top_left_x,
                         item.crops_coords_top_left_y,
                     ),
-                ).images[0].save(f"./output/{idd}/image.png")
+                ).images[0].save(f"{output_dir}/{idd}/image.png")
 
             del jobs[id]
             q.get()
@@ -108,36 +114,54 @@ def Api():
                     item.crops_coords_top_left_x,
                     item.crops_coords_top_left_y,
                 ),
-            ).images[0].save(f"./output/{id}/image.png")
+            ).images[0].save(f"{output_dir}/{id}/image.png")
             del jobs[id]
             q.get()
+
+    @app.get("/")
+    async def index():
+        content = ""
+        with open("./app/index.html") as f:
+            content = f.read()
+        return HTMLResponse(content)
+
+    @app.get("/favicon.ico")
+    async def index():
+        content = ""
+        with open("./app/favicon.ico") as f:
+            content = f.read()
+        return Response(content, media_type="image/x-icon")
 
     @app.get("/api/history")
     async def history():
         ret = []
-        d = duckdb.sql("SELECT *,string_split(filename,'/')[3] as id FROM read_json_auto('./output/*/data.json',filename=true) order by id desc limit 100")
-        for i in d.fetchall():
-            itm = {}
-            for idx,ii in enumerate(i):
-                itm[d.columns[idx]] = ii
-            ret.append(itm)
+        try:
+            d = duckdb.sql(
+                f"SELECT *,string_split(filename,'/')[3] as id FROM read_json_auto('{output_dir}/*/data.json',filename=true) order by id desc limit 100"
+            )
+            for i in d.fetchall():
+                itm = {}
+                for idx, ii in enumerate(i):
+                    itm[d.columns[idx]] = ii
+                ret.append(itm)
+        except Exception as ex:
+            print(ex)
         return ret
 
     @app.delete("/api/history/{id}")
     async def history_del(id: str):
-        shutil.rmtree(f"./output/{id}")
-        return {"status":True}
-
+        shutil.rmtree(f"{output_dir}/{id}")
+        return {"status": True}
 
     @app.get("/api/txt2img/{id}")
     async def txt2img(id: str):
-        return {"status": id in jobs,"tick":datetime.datetime.now().isoformat()}
+        return {"status": id in jobs, "tick": datetime.datetime.now().isoformat()}
 
     @app.post("/api/txt2img")
     async def txt2img(item: Txt2imgRequest, background_tasks: BackgroundTasks):
         id = datetime.datetime.now().isoformat()  # uuid.uuid4()
-        os.mkdir(f"./output/{id}")
-        with open(f"./output/{id}/data.json", "w") as f:
+        os.mkdir(f"{output_dir}/{id}")
+        with open(f"{output_dir}/{id}/data.json", "w") as f:
             f.write(item.json())
         jobs[id] = item
         background_tasks.add_task(gen, id)
@@ -151,7 +175,6 @@ def Api():
         background_tasks.add_task(gen, id)
 
         return {"id": id}
-
 
     return app
 

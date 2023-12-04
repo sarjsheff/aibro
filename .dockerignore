@@ -1,0 +1,12 @@
+/output
+/output.*
+/*.db
+__pycache__
+/spa
+/data
+/flagged
+/core.*
+/venv
+/aibro-ui
+/ci.sh
+/pics
