@@ -2,7 +2,7 @@
 
 
 <p align="center">
-    <img align="center" src="https://raw.githubusercontent.com/sarjsheff/aibro/master/pics/logo.png">
+    <img width="400" align="center" src="https://raw.githubusercontent.com/sarjsheff/aibro/master/pics/logo.png">
 </p>
 
 
@@ -10,6 +10,7 @@ My ML tool.
 
 - [x] StableDiffusion XL txt2img generator
 - [x] Prompt script
+- [x] Gallery
 
 Run:
 

@@ -1,6 +1,28 @@
 <template>
   <q-card class="fit">
     <q-card-section>
+      <q-btn-toggle
+        v-model="store.job_type"
+        push
+        glossy
+        toggle-color="primary"
+        :options="[
+          { label: 'SDXL 1.0', value: 0 },
+          { label: 'SDXL ConrolNet', value: 1 },
+        ]"
+      />
+    </q-card-section>
+    <q-card-section v-if="store.job_type == 1">
+      <q-input
+        v-model="store.input_image"
+        label="input image"
+      />
+      <q-input
+        v-model="store.controlnet_conditioning_scale"
+        label="controlnet_conditioning_scale"
+      />
+    </q-card-section>
+    <q-card-section>
       <div class="flex q-gutter-md">
         <q-input
           style="flex: 1"

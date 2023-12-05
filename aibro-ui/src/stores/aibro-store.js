@@ -22,6 +22,9 @@ export const useAibroStore = defineStore('aibro', {
       target_size_height: 1024,
       crops_coords_top_left_x: 0,
       crops_coords_top_left_y: 0,
+      job_type: 0,
+      input_image: null,
+      controlnet_conditioning_scale: 0.5
     };
 
     for (const i in ret) {
@@ -50,9 +53,7 @@ export const useAibroStore = defineStore('aibro', {
   actions: {
     del_history(i) {
       this.loading_history = true
-      axios.delete(`/api/history/${encodeURIComponent(i.id)}`).then(({ data }) => {
-        this.reload_history();
-      })
+      return axios.delete(`/api/history/${encodeURIComponent(i.id)}`);
     },
     load_history(page,rowsPerPage,sortBy,descending) {
       this.loading_history = true
@@ -129,6 +130,9 @@ export const useAibroStore = defineStore('aibro', {
         target_size_height: this.target_size_height,
         crops_coords_top_left_x: this.crops_coords_top_left_x,
         crops_coords_top_left_y: this.crops_coords_top_left_y,
+        job_type: this.job_type,
+        input_image: this.input_image,
+        controlnet_conditioning_scale: this.controlnet_conditioning_scale
       };
 
       let queue = [data];

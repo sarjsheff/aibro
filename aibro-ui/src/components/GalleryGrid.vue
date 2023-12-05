@@ -17,6 +17,13 @@
         </div>
       </q-td>
     </template>
+    <template v-slot:body-cell-image="props">
+      <q-td :props="props">
+        <div class="text-red">
+          <img height="35" :src="props.value"/>
+        </div>
+      </q-td>
+    </template>
     <template v-slot:top-right>
       <q-toggle
         v-model="grid_view"
@@ -44,14 +51,14 @@
               icon="content_copy"
               class="absolute"
               style="top: 0; right: 46px; transform: translateY(-60%)"
-              @click="store.copy_history(props.row)"
+              @click="store_controlnet.from_output(props.row)"
             />
             <q-btn
               fab-mini
               color="accent"
               icon="delete"
               class="absolute"
-              @click="del(index)"
+              @click="del(props.row)"
               style="top: 0; right: 0px; transform: translateY(-60%)"
             />
             <div class="text-h8">{{ props.row.id }}</div>
@@ -69,6 +76,7 @@
 
 <script>
 import { useAibroStore } from "src/stores/aibro-store";
+import { useControlnetStore } from "src/stores/controlnet-store";
 import { defineComponent, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { ref } from "vue";
@@ -82,6 +90,15 @@ const cols = [
     field: (row) => row.id,
     format: (val) => `${val}`,
     sortable: true,
+  },
+  {
+    name: "image",
+    required: true,
+    label: "Output image",
+    align: "center",
+    field: (row) => `/output/${encodeURIComponent(row.id)}/image.png`,
+    format: (val) => `${val}`,
+    sortable: false,
   },
   {
     name: "seed",
@@ -111,20 +128,57 @@ const cols = [
     sortable: true,
   },
   {
-    name: "image",
+    name: "width",
     required: true,
-    label: "Output image",
-    align: "left",
-    field: (row) => `/output/${encodeURIComponent(row.id)}/image.png`,
+    label: "Width",
+    align: "center",
+    field: (row) => row.width,
     format: (val) => `${val}`,
-    sortable: false,
+    sortable: true,
   },
+  {
+    name: "height",
+    required: true,
+    label: "Height",
+    align: "center",
+    field: (row) => row.height,
+    format: (val) => `${val}`,
+    sortable: true,
+  },
+  {
+    name: "num_inference_steps",
+    required: true,
+    label: "Inference steps",
+    align: "left",
+    field: (row) => row.num_inference_steps,
+    format: (val) => `${val}`,
+    sortable: true,
+  },
+  {
+    name: "guidance_scale",
+    required: true,
+    label: "Guidance scale",
+    align: "left",
+    field: (row) => row.guidance_scale,
+    format: (val) => `${val}`,
+    sortable: true,
+  },
+  {
+    name: "guidance_rescale",
+    required: true,
+    label: "Guidance rescale",
+    align: "left",
+    field: (row) => row.guidance_scale,
+    format: (val) => `${val}`,
+    sortable: true,
+  }
 ];
 
 export default defineComponent({
   name: "GalleryGrid",
   setup() {
     const store = useAibroStore();
+    const store_controlnet = useControlnetStore();
     const $q = useQuasar();
     const grid_view = ref(false);
     const pagination = ref({
@@ -159,6 +213,7 @@ export default defineComponent({
       onRequest({ pagination: pagination.value });
     });
     return {
+      store_controlnet,
       pagination,
       rows,
       grid_view,
@@ -168,11 +223,13 @@ export default defineComponent({
       del(index) {
         $q.dialog({
           title: "Confirm",
-          message: "Delete item?",
+          message: `Delete item?`,
           cancel: true,
           persistent: true,
         }).onOk(() => {
-          store.del_history(index);
+          store.del_history(index).then(()=>{
+            onRequest({ pagination: pagination.value })
+          })
         });
       },
     };

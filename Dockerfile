@@ -18,6 +18,8 @@ RUN python3 -c 'from diffusers import StableDiffusionXLPipeline;StableDiffusionX
 
 RUN python3 -c 'import torch;from diffusers import StableDiffusionXLPipeline;StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0",torch_dtype=torch.float16,variant="fp16",use_safetensors=True)'
 
+RUN python3 -c 'import torch;from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL;controlnet = ControlNetModel.from_pretrained("diffusers/controlnet-canny-sdxl-1.0", torch_dtype=torch.float16);vae = AutoencoderKL.from_pretrained("madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16);pipe = StableDiffusionXLControlNetPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", controlnet=controlnet, vae=vae, torch_dtype=torch.float16)'
+
 COPY . /app/
 
 CMD ["uvicorn","aibro:Api","--host", "0.0.0.0", "--port", "8002", "--workers", "1"]

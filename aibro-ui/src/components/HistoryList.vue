@@ -60,7 +60,9 @@ export default defineComponent({
           cancel: true,
           persistent: true,
         }).onOk(() => {
-          store.del_history(index);
+          store.del_history(index).then(()=>{
+            store.reload_history();
+          });
         });
       },
     };

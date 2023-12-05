@@ -53,8 +53,7 @@ const linksList = [
     caption: "Generations gallery.",
     icon: "school",
     link: "/gallery",
-  },
-
+  }
   // {
   //   title: "img2img",
   //   caption: "Image to image.",
