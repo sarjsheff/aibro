@@ -11,8 +11,8 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> AIBro </q-toolbar-title>
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+        <q-toolbar-title>AIBro</q-toolbar-title>
+        <q-btn v-if="$route.path == '/'" dense flat round icon="menu" @click="toggleRightDrawer" />
       </q-toolbar>
     </q-header>
 
@@ -49,17 +49,24 @@ const linksList = [
     link: "/",
   },
   {
-    title: "img2img",
-    caption: "Image to image.",
+    title: "Gallery",
+    caption: "Generations gallery.",
     icon: "school",
-    link: "/img2img",
+    link: "/gallery",
   },
-  {
-    title: "imgeditor",
-    caption: "Edit images.",
-    icon: "school",
-    link: "/imgeditor",
-  },
+
+  // {
+  //   title: "img2img",
+  //   caption: "Image to image.",
+  //   icon: "school",
+  //   link: "/img2img",
+  // },
+  // {
+  //   title: "imgeditor",
+  //   caption: "Edit images.",
+  //   icon: "school",
+  //   link: "/imgeditor",
+  // },
 ];
 
 export default defineComponent({

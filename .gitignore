@@ -8,3 +8,4 @@ __pycache__
 /core.*
 /venv
 /ci.sh
+/test.py

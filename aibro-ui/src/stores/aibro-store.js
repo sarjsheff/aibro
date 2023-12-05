@@ -54,6 +54,12 @@ export const useAibroStore = defineStore('aibro', {
         this.reload_history();
       })
     },
+    load_history(page,rowsPerPage,sortBy,descending) {
+      this.loading_history = true
+      return axios.post("/api/history",{
+        page,rowsPerPage,sortBy:sortBy || "id",descending
+      });
+    },
     reload_history() {
       this.loading_history = true
       axios.get("/api/history").then(({ data }) => {

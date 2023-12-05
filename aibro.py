@@ -33,6 +33,11 @@ class Txt2imgRequest(BaseModel):
     crops_coords_top_left_y: int
     prompt_script: str
 
+class HistoryRequest(BaseModel):
+    page: int
+    rowsPerPage: int
+    sortBy: str
+    descending: bool
 
 def Api(output_dir="./output"):
     if not os.path.isdir(output_dir):
@@ -147,6 +152,27 @@ def Api(output_dir="./output"):
         except Exception as ex:
             print(ex)
         return ret
+
+    @app.post("/api/history")
+    async def history(r: HistoryRequest):
+        ret = {"count":0,"rows":[]}
+        try:
+            orderby = " id desc "
+            if r.sortBy is not None and r.sortBy != "":
+                orderby = f" {r.sortBy} {'desc' if r.descending else 'asc'} "
+            d = duckdb.sql(
+                f"SELECT *,string_split(filename,'/')[3] as id FROM read_json_auto('{output_dir}/*/data.json',filename=true) order by {orderby} offset {r.rowsPerPage*(r.page-1) if r.page > 0 else 0} limit {r.rowsPerPage}"
+            )
+            for i in d.fetchall():
+                itm = {}
+                for idx, ii in enumerate(i):
+                    itm[d.columns[idx]] = ii
+                ret["rows"].append(itm)
+            ret["count"] = duckdb.sql(f"SELECT count() FROM read_json_auto('{output_dir}/*/data.json',filename=true)").fetchone()[0]
+        except Exception as ex:
+            print(ex)
+        return ret
+
 
     @app.delete("/api/history/{id}")
     async def history_del(id: str):

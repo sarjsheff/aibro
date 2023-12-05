@@ -100,14 +100,14 @@ module.exports = configure(function (/* ctx */) {
       open: true, // opens browser window automatically\
       proxy: {
         '/api': {
-          target: 'http://localhost:8000',
+          target: process.env.AIBRO_PROXY || 'http://localhost:8000',
           changeOrigin: true,
           pathRewrite: {
             '^/api': ''
           }
         },
         '/output': {
-          target: 'http://localhost:8000',
+          target: process.env.AIBRO_PROXY || 'http://localhost:8000',
           changeOrigin: true,
           pathRewrite: {
             '^/output': ''
