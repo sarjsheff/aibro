@@ -12,19 +12,23 @@
         />
 
         <q-toolbar-title>AIBro</q-toolbar-title>
-        <q-btn v-if="$route.path == '/'" dense flat round icon="menu" @click="toggleRightDrawer" />
+        <q-btn
+          v-if="$route.path == '/txt2img'"
+          dense
+          flat
+          round
+          icon="menu"
+          @click="toggleRightDrawer"
+        />
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Menu </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+        <template v-for="link in essentialLinks" :key="link.title">
+          <EssentialLink v-bind="link" v-if="check(link)" />
+        </template>
       </q-list>
     </q-drawer>
     <q-drawer v-model="rightDrawerOpen" side="right" overlay bordered>
@@ -40,11 +44,12 @@
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import HistoryList from "src/components/HistoryList.vue";
+import { useAibroStore } from "src/stores/aibro-store";
 
 const linksList = [
   {
-    title: "txt2img",
-    caption: "Text to image.",
+    title: "Services",
+    caption: "Manage services.",
     icon: "school",
     link: "/",
   },
@@ -53,7 +58,19 @@ const linksList = [
     caption: "Generations gallery.",
     icon: "school",
     link: "/gallery",
-  }
+  },
+  {
+    title: "Txt2img",
+    caption: "Text to image.",
+    icon: "school",
+    link: "/proc_txt2img",
+  },
+  {
+    title: "Txt2Txt",
+    caption: "Text generation.",
+    icon: "school",
+    link: "/proc_txt2txt",
+  },
   // {
   //   title: "img2img",
   //   caption: "Image to image.",
@@ -79,8 +96,10 @@ export default defineComponent({
   setup() {
     const leftDrawerOpen = ref(false);
     const rightDrawerOpen = ref(false);
+    const store = useAibroStore();
 
     return {
+      store,
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
@@ -89,6 +108,13 @@ export default defineComponent({
       rightDrawerOpen,
       toggleRightDrawer() {
         rightDrawerOpen.value = !rightDrawerOpen.value;
+      },
+      check(link) {
+        if (link.link.indexOf("/proc_") == 0) {
+          return store.procs[link.link.split("_")[1]]?.is_alive == true;
+        } else {
+          return true;
+        }
       },
     };
   },

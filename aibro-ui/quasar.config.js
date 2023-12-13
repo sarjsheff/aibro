@@ -99,11 +99,25 @@ module.exports = configure(function (/* ctx */) {
       // https: true
       open: true, // opens browser window automatically\
       proxy: {
-        '/api': {
+        '/api/proc': {
           target: process.env.AIBRO_PROXY || 'http://localhost:8000',
           changeOrigin: true,
           pathRewrite: {
-            '^/api': ''
+            '^/api/proc': ''
+          }
+        },
+        '/api/history': {
+          target: process.env.AIBRO_PROXY || 'http://localhost:8000',
+          changeOrigin: true,
+          pathRewrite: {
+            '^/api/history': ''
+          }
+        },
+        '/api/txt2img': {
+          target: process.env.AIBRO_PROXY_TXT2IMG || 'http://localhost:8000',
+          changeOrigin: true,
+          pathRewrite: {
+            '^/api/txt2img': ''
           }
         },
         '/output': {

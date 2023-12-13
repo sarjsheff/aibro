@@ -9,3 +9,7 @@ __pycache__
 /venv
 /ci.sh
 /test.py
+/test*
+*.gguf
+/.vscode
+/.idea

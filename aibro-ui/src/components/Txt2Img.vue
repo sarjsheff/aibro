@@ -8,7 +8,7 @@
         toggle-color="primary"
         :options="[
           { label: 'SDXL 1.0', value: 0 },
-          { label: 'SDXL ConrolNet', value: 1 },
+          { label: 'SDXL ControlNet', value: 1 },
         ]"
       />
     </q-card-section>
@@ -99,6 +99,7 @@
     </q-expansion-item>
     <q-card-section v-if="store.output_image">
       <q-img :src="store.output_image"></q-img>
+      <q-img v-if="store.job_type == 1" :src="store.output_image.replace('.png','_canny.png')"></q-img>
     </q-card-section>
     <q-card-section>
       <q-btn label="Run" color="primary" @click="store.txt2img_run()" />

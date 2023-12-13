@@ -3,9 +3,15 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted } from "vue";
+import { useAibroStore } from "src/stores/aibro-store";
 
 export default defineComponent({
-  name: 'App'
-})
+  name: "App",
+  setup() {
+    const store = useAibroStore();
+    onMounted(() => store.load_procs());
+    return {};
+  },
+});
 </script>
